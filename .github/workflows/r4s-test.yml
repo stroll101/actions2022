@@ -58,7 +58,7 @@ jobs:
           make image PACKAGES="$PACKAGES $LUCI $LP luci-i18n-base-zh-cn luci-i18n-firewall-zh-cn" FILES="files"
           mv $(ls -1 ./bin/targets/*/*/*img.gz | head -1) $GITHUB_WORKSPACE/release/r4s-with-docker.img.gz
           cd $GITHUB_WORKSPACE/release/ && md5sum r4s-with-docker.img.gz > r4s-with-docker.img.gz.md5
-          gzip -dc r4s-with-docker.img.gz | md5sum | sed "s/-/$DEVICE-with-docker.img/" > $DEVICE-with-docker.img.md5
+          gzip -dc r4s-with-docker.img.gz | md5sum | sed "s/-/r4s-with-docker.img/" > r4s-with-docker.img.md5
       - name: Upload release asset
         uses: svenstaro/upload-release-action@v2
         with:
