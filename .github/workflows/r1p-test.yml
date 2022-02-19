@@ -68,6 +68,6 @@ jobs:
         with:
           repo: stroll101/actions2022 # defaults to current repo
           keep_latest: 30
-          delete_tag_pattern: OrangePi # defaults to ""
+          delete_tag_pattern: R1P # defaults to ""
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
