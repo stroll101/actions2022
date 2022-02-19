@@ -26,7 +26,7 @@ jobs:
     steps:
     - uses: dev-drprasad/delete-older-releases@v0.2.0
       with:
-        repo: stroll101/actions # defaults to current repo
+        repo: stroll101/actions2022 # defaults to current repo
         keep_latest: 5
         delete_tags: Source # defaults to ""
       env:
