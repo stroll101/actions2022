@@ -68,6 +68,6 @@ jobs:
         with:
           repo: stroll101/actions2022 # defaults to current repo
           keep_latest: 20
-          delete_tag_pattern: NanoPi # defaults to ""
+          delete_tag_pattern: R4S # defaults to ""
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
