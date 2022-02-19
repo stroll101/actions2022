@@ -1,0 +1,70 @@
+name: r1p
+
+on:
+  schedule:
+    - cron: 0 */10 * * *
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+
+jobs:
+  generate_firmware:
+    name: Generate r1p firmware
+    runs-on: ubuntu-18.04
+    env:
+      DEVICE: r1p
+
+    steps:
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Generate firmware
+        run: |
+          sudo sysctl vm.swappiness=0
+          nohup sudo rm -rf /usr/share/dotnet /usr/local/lib/android/sdk &
+          cd
+          sudo curl -sL https://raw.githubusercontent.com/klever1988/nanopi-openwrt/zstd-bin/zstd | sudo tee /usr/bin/zstd > /dev/null
+          for i in {1..10}
+          do
+            curl -sL --fail https://github.com/klever1988/sshactions/releases/download/cache/lede.r1p.img.zst.0$i || break
+          done | zstdmt -d -o lede.img
+          LOOP_DEVICE=$(losetup -f) && echo "LOOP_DEVICE=$LOOP_DEVICE" >> $GITHUB_ENV
+          sudo losetup -P --direct-io $LOOP_DEVICE lede.img
+          mkdir lede && sudo mount -o nossd,compress=zstd $LOOP_DEVICE lede
+          cd lede
+          cat $GITHUB_WORKSPACE/r1p.config.seed > .config
+          echo -e '# CONFIG_SIGNED_PACKAGES is not set\n' >> .config
+          make defconfig && make -j$(($(nproc) + 1))
+          
+          mkdir -p $GITHUB_WORKSPACE/release
+          mv $(ls -1 ./bin/targets/*/*/*img.gz) $GITHUB_WORKSPACE/release/r1p.img.gz
+          cd $GITHUB_WORKSPACE/release/ && md5sum r1p.img.gz > r1p.img.md5
+          echo "strDate=$(TZ=UTC-8 date +%Y.%m.%d-%H%M)" >> $GITHUB_ENV
+          echo "strDevice=$(echo r1p | awk '{print toupper($0)}')" >> $GITHUB_ENV
+      - name: Upload release asset
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./release/*
+          tag: ${{env.DEVICE}}-${{env.strDate}}
+          file_glob: true
+          overwrite: true
+          release_name: OrangePi ${{env.strDevice}} ${{env.strDate}} 
+
+      - name: Debug via tmate
+        uses: klever1988/ssh2actions@main
+        if: ${{ failure() }}
+        with:
+          mode: ngrok
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SSH_PASSWORD: ${{secrets.SSH_PASSWORD}}
+          SSH_PUBKEY: ${{secrets.SSH_PUBKEY}}
+          NGROK_TOKEN: ${{secrets.NGROK_TOKEN}}
