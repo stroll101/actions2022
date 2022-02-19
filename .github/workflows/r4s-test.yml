@@ -57,12 +57,12 @@ jobs:
           file_glob: true
           overwrite: true
           release_name: NanoPi ${{env.strDevice}} ${{env.strDate}}
+          
       - name: Delete workflow runs
         uses: GitRML/delete-workflow-runs@main
         with:
           retain_days: 15
           keep_minimum_runs: 11
-
       - name: Remove old Releases
         uses: dev-drprasad/delete-older-releases@v0.1.0
         with:
