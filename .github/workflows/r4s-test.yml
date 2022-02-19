@@ -64,9 +64,10 @@ jobs:
           retain_days: 15
           keep_minimum_runs: 11
       - name: Remove old Releases
-        uses: dev-drprasad/delete-older-releases@v0.1.0
+      - uses: dev-drprasad/delete-older-releases@v0.2.0
         with:
-          keep_latest: 30
-          delete_tags: true
+          repo: stroll101/actions # defaults to current repo
+          keep_latest: 25
+          delete_tag_pattern: NanoPi # defaults to ""
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
