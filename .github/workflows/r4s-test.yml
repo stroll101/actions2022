@@ -64,9 +64,9 @@ jobs:
           retain_days: 15
           keep_minimum_runs: 11
       - name: Remove old Releases
-      - uses: dev-drprasad/delete-older-releases@v0.2.0
+        uses: dev-drprasad/delete-older-releases@v0.2.0
         with:
-          repo: stroll101/actions # defaults to current repo
+          repo: stroll101/actions2022 # defaults to current repo
           keep_latest: 20
           delete_tag_pattern: NanoPi # defaults to ""
         env:
