@@ -30,10 +30,10 @@ jobs:
           sudo sysctl vm.swappiness=0
           ulimit -SHn 65000
           curl -L https://github.com/klever1988/sshactions/releases/download/cache/ib-$DEVICE.tar.xz | tar -Jxvf -
-          sed -i 's/192.168.2.1/192.168.1.1/g' package/base-files/files/bin/config_generate
           set -x
           mv *imagebuilder* ib && cd ib
           . $GITHUB_WORKSPACE/scripts/merge_files.sh
+          . $GITHUB_WORKSPACE/scripts/patches.sh
           sed -i '/local/d;s/#//' files/etc/opkg/distfeeds.conf
           sed -i 's/luci-app-[^ ]*//g' include/target.mk $(find target/ -name Makefile)
           sed -i 's/$(OPKG) install $(BUILD_PACKAGES)/$(OPKG) install --force-overwrite $(BUILD_PACKAGES)/' Makefile
