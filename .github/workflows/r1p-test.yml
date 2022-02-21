@@ -34,8 +34,7 @@ jobs:
           mv *imagebuilder* ib && cd ib
           . $GITHUB_WORKSPACE/scripts/merge_files.sh
           sed -i '/local/d;s/#//' files/etc/opkg/distfeeds.conf
-          chmod +x $GITHUB_WORKSPACE/scripts/patches.sh
-          cd openwrt
+          chmod +x $GITHUB_WORKSPACE/scripts/patches.sh        
           sed -i 's/192.168.2.1/192.168.1.1/' package/base-files/files/bin/config_generate
           sed -i 's/luci-app-[^ ]*//g' include/target.mk $(find target/ -name Makefile)
           sed -i 's/$(OPKG) install $(BUILD_PACKAGES)/$(OPKG) install --force-overwrite $(BUILD_PACKAGES)/' Makefile
