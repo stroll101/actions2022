@@ -56,7 +56,7 @@ jobs:
           tag: ${{env.strDate}}
           file_glob: true
           overwrite: true
-          release_name: x86 ${{env.strDevice}} ${{env.strDate}} 
+          release_name: ${{env.strDevice}} ${{env.strDate}} 
           
       - name: Delete workflow runs
         uses: GitRML/delete-workflow-runs@main
