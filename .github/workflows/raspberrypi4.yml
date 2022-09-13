@@ -29,7 +29,7 @@ jobs:
           sudo apt update && sudo apt install qemu-utils
           sudo sysctl vm.swappiness=0
           ulimit -SHn 65000
-          curl -L https://github.com/SuLingGG/OpenWrt-Rpi/releases/download/openwrt-bcm27xx-bcm2711/immortalwrt-imagebuilder-bcm27xx-bcm2711.Linux-x86_64.tar.xz | tar -Jxvf -
+          curl -L https://github.com/SuLingGG/OpenWrt-Rpi/releases/download/bcm27xx-bcm2711/immortalwrt-imagebuilder-bcm27xx-bcm2711.Linux-x86_64.tar.xz | tar -Jxvf -
           set -x 
           mv *imagebuilder* ib && cd ib
           . $GITHUB_WORKSPACE/scripts/merge_files.sh
