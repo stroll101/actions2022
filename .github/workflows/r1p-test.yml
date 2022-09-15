@@ -2,7 +2,7 @@ name: r1p
 
 on:
   schedule:
-    - cron: 0 */10 * * *
+    - cron: '15 17 * * *'
   repository_dispatch:
   workflow_dispatch:
     inputs:
