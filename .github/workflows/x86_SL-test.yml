@@ -13,7 +13,7 @@ on:
 
 jobs:
   generate_firmware:
-    name: Generate x86 firmware
+    name: Generate x86_SL firmware
     runs-on: ubuntu-20.04
     env:
       DEVICE: x86_SL
