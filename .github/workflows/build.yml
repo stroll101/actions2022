@@ -64,29 +64,9 @@ jobs:
     runs-on: ubuntu-latest
     # runs-on: ${{ github.event.inputs.os }} || {{ github.event.client_payload }}
     outputs:
-      build_repo: ${{ steps.set_matrix.outputs.matrix }}
       real_target: ${{ steps.set_matrix.outputs.target }}
       inputs_json: ${{ steps.set_matrix.outputs.input }}
     name: "set matrix for: ${{ github.event.inputs.target }}"
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@main
-
-  build:
-    needs: set_matrix
-    runs-on: ${{ fromJson(needs.set_matrix.outputs.inputs_json).os }} # ${{ needs.set_matrix.outputs.os }}
-    outputs:
-      imageBuilder: ${{ steps.organize.outputs.imageBuilder }}
-      build_target: ${{ steps.organize.outputs.build_target }}
-    name: "${{matrix.target}}:${{matrix.repo.name}}-${{matrix.repo.branch}}"
-    strategy:
-      fail-fast: false
-      matrix:
-        target: 
-          #- "${{ github.event.inputs.target }}"
-          - ${{ fromJson(needs.set_matrix.outputs.inputs_json).target }} #"${{ needs.set_matrix.outputs.real_target }}"
-        repo: ${{ fromJson(needs.set_matrix.outputs.build_repo) }}
 
     steps:
     - name: Checkout
