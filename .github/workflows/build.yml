@@ -73,28 +73,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
 
-    - name: prinf info
-      id: set_matrix
-      run: |
-        [ -n "${{ github.event.inputs.branch }}" ] && real_branch=${{ github.event.inputs.branch }}
-        [ -n "${{ github.event.client_payload.branch }}" ] && real_branch=${{ github.event.client_payload.branch }}
-        [ -z "$real_branch" ] && real_branch=${GITHUB_REF##*/}
-        echo "real_branch: $real_branch"
-        git fetch && git reset --hard origin/${real_branch} && git clean -df
-
-        echo '${{ toJson(github) }}' > /tmp/github
-        cat /tmp/github
-        pwd # /home/runner/work/Actions-OpenWrt/Actions-OpenWrt
-        ls -al
-        # set $1
-        set -- set
-        source build/common/scripts/start_set_matrix.sh
-
-
-    - name: prinf set_matrix
-      run: |
-        echo '${{ steps.set_matrix.outputs.matrix }}'
-
   build:
     needs: set_matrix
     runs-on: ${{ fromJson(needs.set_matrix.outputs.inputs_json).os }} # ${{ needs.set_matrix.outputs.os }}
@@ -113,50 +91,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@main
-
-    - name: prinf machine info and matrix info
-      run: |
-        real_branch=${GITHUB_REF##*/}
-        if [ -n "${{ github.event.inputs.branch }}" ];then
-          real_branch=${{ github.event.inputs.branch }}
-        fi
-        [ -n "${{ github.event.client_payload.branch }}" ] && real_branch=${{ github.event.client_payload.branch }}
-        git fetch && git reset --hard origin/${real_branch} && git clean -df
-        echo "real_branch=${real_branch}" >> $GITHUB_ENV
-
-        echo '${{ needs.set_matrix.outputs.inputs_json }}' > /tmp/github.json
-        cat /tmp/github.json
-        source build/common/scripts/start_set_matrix.sh
-        
-
-        uname -a
-        cat /etc/os-release
-        df -h
-        lscpu
-        free -h
-        echo 'target: ${{ matrix.target }} ${{ toJSON(matrix.repo) }}'
-        # 移动 $target ，后续步骤不记得不需要用 build/${{ github.event.inputs.target }}
-        cp -a build/${{ matrix.target }}/* ${GITHUB_WORKSPACE}/
-        cp -a ${GITHUB_WORKSPACE}/build/common ${GITHUB_WORKSPACE}/
-
-        echo "build_target=${{ matrix.target }}" >> $GITHUB_ENV
-
-        if [ "${os}" != 'self-hosted' ];then
-          if [ "${real_branch}" = 'test' ] && [ "$(LANG=en_US.UTF-8 lscpu | awk '$1=="CPU"&&$2=="MHz:"{print int($3)}')" -le 2500 ];then
-            hour_num=$(TZ=Asia/Shanghai date '+%H')
-            # 白天频率太小不执行，晚上可以定时任务执行
-            if [ "${{ github.repository_owner }}" = zhangguanzhang ] && [ $hour_num -ge 9 ];then
-              # 多个 matrix repo 编译无视频率
-              if [ -z "${repo_json}" ] && ! grep -Pq '^\s*[^#]+?\},\{' ${GITHUB_WORKSPACE}/set_matrix.sh;then
-                echo "cpu 频率太小，不执行"
-                #exit 233
-              fi
-            fi
-          fi
-        fi
-
-    # - name: install docker
-    #   uses: docker-practice/actions-setup-docker@master
       
     - name: Login to Docker Hub
       uses: docker/login-action@v2
@@ -781,40 +715,7 @@ jobs:
       uses: actions/checkout@main
 
     # - name: install docker
-    #   uses: docker-practice/actions-setup-docker@master
-      
-    - name: prinf info
-      run: |
-        df -h
-        lscpu
-        free -h
-        sudo sysctl vm.swappiness=0
-        #                   slim/full
-        echo 'target: ${{matrix.target}}' 'repo: ${{ toJSON(matrix.repo) }}'
-        pwd
-        ls -l .
-
-        echo '${{ needs.set_matrix.outputs.inputs_json }}' > /tmp/github.json
-        cat /tmp/github.json
-        source build/common/scripts/start_set_matrix.sh
-
-        # 容量满的时候强制推送，re run failed 然后拉取获取最新脚本
-        real_branch=${GITHUB_REF##*/}
-        if [ -n "${branch}" ];then
-          real_branch=${branch}
-        fi
-
-        echo "real_branch=${real_branch}" >> $GITHUB_ENV
-        git fetch && git reset --hard origin/${real_branch} && git clean -df
-
-        echo "repo_name=${{ matrix.repo.name }}" >> $GITHUB_ENV
-        echo "repo_branch=${{ matrix.repo.branch }}" >> $GITHUB_ENV
-        echo "input_os=${os}" >> $GITHUB_ENV
-        if [ "${{matrix.target}}" == 'slim' ];then
-          echo "suffix=-slim" >> $GITHUB_ENV
-        else
-          echo "suffix=-full" >> $GITHUB_ENV
-        fi
+    #   uses: docker-practice/actions-setup-docker@master   
 
     - name: Initialization environment
       id: init
