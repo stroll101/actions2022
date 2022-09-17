@@ -1,0 +1,73 @@
+name: x86_test
+
+on:
+  schedule:
+    - cron: '30 18 * * *'
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+
+jobs:
+  generate_firmware:
+    name: Generate x86 firmware
+    runs-on: ubuntu-20.04
+    env:
+      DEVICE: x86
+
+    steps:
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Generate firmware
+        run: |
+          sudo apt update && sudo apt install qemu-utils
+          sudo sysctl vm.swappiness=0
+          ulimit -SHn 65000
+          curl -L https://github.com/zhangguanzhang/Actions-OpenWrt/suites/8126717485/artifacts/352217259 | zip -Jxvf -
+          set -x 
+          mv *imagebuilder* ib && cd ib
+          . $GITHUB_WORKSPACE/scripts/merge_files.sh
+          sed -i '/local/d;s/#//' files/etc/opkg/distfeeds.conf
+          sed -i 's/luci-app-[^ ]*//g' include/target.mk $(find target/ -name Makefile)
+          sed -i 's/$(OPKG) install $(BUILD_PACKAGES)/$(OPKG) install --force-overwrite $(BUILD_PACKAGES)/' Makefile
+          ls packages/*.ipk | xargs -n1 basename > package.files
+          PACKAGES=$(cat $GITHUB_WORKSPACE/$DEVICE.config.seed $GITHUB_WORKSPACE/common.seed | grep CONFIG_PACKAGE | grep -v CONFIG_PACKAGE_luci-app | sed 's/CONFIG_PACKAGE_//;s/=y//' | xargs -n1 -i grep -o {} package.files | sort -u | xargs echo)
+          PACKAGES="$PACKAGES `grep -o luci-i18n-opkg-zh-cn package.files || true`"
+          LUCI=$(cat $GITHUB_WORKSPACE/$DEVICE.config.seed $GITHUB_WORKSPACE/common.seed | grep CONFIG_PACKAGE_luci-app | grep -v docker | sed 's/CONFIG_PACKAGE_//;s/=y//' | xargs -n1 -i grep -o {} package.files | sort -u | xargs echo)
+          LP=$(echo $LUCI | sed 's/-app-/-i18n-/g;s/ /\n/g' | xargs -n1 -i grep -o {}-zh-cn package.files | xargs echo)
+          make image PACKAGES="$PACKAGES $LUCI $LP luci-i18n-base-zh-cn luci-i18n-firewall-zh-cn" FILES="files"
+          mkdir -p $GITHUB_WORKSPACE/release
+          mv $(ls -1 ./bin/targets/*/*/*img.gz | head -1) $GITHUB_WORKSPACE/release/$DEVICE.img.gz
+          cd $GITHUB_WORKSPACE/release/ && md5sum $DEVICE.img.gz > $DEVICE.img.gz.md5
+          gzip -dc $DEVICE.img.gz | md5sum | sed "s/-/$DEVICE.img/" > $DEVICE.img.md5
+          echo "strDate=$(TZ=UTC-8 date +%Y.%m.%d-%H%M)" >> $GITHUB_ENV
+          echo "strDevice=$(echo $DEVICE | awk '{print toupper($0)}')" >> $GITHUB_ENV
+      - name: Upload release asset
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./release/*
+          tag: ${{env.strDate}}
+          file_glob: true
+          overwrite: true
+          release_name: ${{env.strDevice}} ${{env.strDate}} 
+          
+      - name: Delete workflow runs
+        uses: GitRML/delete-workflow-runs@main
+        with:
+          retain_days: 15
+          keep_minimum_runs: 11
+      - name: Remove old Releases
+        uses: dev-drprasad/delete-older-releases@v0.2.0
+        with:
+          repo: stroll101/actions2022 # defaults to current repo
+          keep_latest: 30
+          delete_tag_pattern: x86 # defaults to ""
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
