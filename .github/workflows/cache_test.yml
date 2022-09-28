@@ -29,7 +29,9 @@ jobs:
           sudo apt update && sudo apt install qemu-utils
           sudo sysctl vm.swappiness=0
           ulimit -SHn 65000  
-          curl -JLO  https://github.com/klever1988/sshactions/releases/download/cache/ib-$DEVICE.tar.xz         
+          curl -JLO  https://github.com/klever1988/sshactions/releases/download/cache/ib-$DEVICE.tar.xz    
+          mkdir -p $GITHUB_WORKSPACE/release
+          mv ib-x86.tar.xz $GITHUB_WORKSPACE/release/$DEVICE.tar.xz
           echo "strDate=$(TZ=UTC-8 date +%Y.%m.%d-%H%M)" >> $GITHUB_ENV
           echo "strDevice=$(echo $DEVICE | awk '{print toupper($0)}')" >> $GITHUB_ENV
       - name: Upload release asset
