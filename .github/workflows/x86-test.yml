@@ -12,7 +12,7 @@ on:
         default: 'false'
 
 jobs:
-  generate_slim_firmware:
+  generate_firmware:
     name: Generate x86 firmware
     runs-on: ubuntu-20.04
     env:
@@ -57,7 +57,7 @@ jobs:
           tag: ${{env.strDate}}
           file_glob: true
           overwrite: true
-          release_name: slim_${{env.strDevice}} ${{env.strDate}} 
+          release_name: ${{env.strDevice}} ${{env.strDate}} 
           
       - name: Delete workflow runs
         uses: GitRML/delete-workflow-runs@main
