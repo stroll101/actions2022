@@ -32,7 +32,6 @@ jobs:
           curl -L https://github.com/klever1988/sshactions/releases/download/cache/ib-$DEVICE.tar.xz | tar -Jxvf -
           set -x 
           mv *imagebuilder* ib && cd ib
-          mkdir -p $GITHUB_WORKSPACE/release
           mv $GITHUB_WORKSPACE/release/ib-$DEVICE.tar.xz
           echo "strDate=$(TZ=UTC-8 date +%Y.%m.%d-%H%M)" >> $GITHUB_ENV
           echo "strDevice=$(echo $DEVICE | awk '{print toupper($0)}')" >> $GITHUB_ENV
