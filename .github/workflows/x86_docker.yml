@@ -2,7 +2,7 @@ name: x86_docker
 
 on:
   schedule:
-    - cron: '30 18 * * *'
+    - cron: '30 05 * * *'
   repository_dispatch:
   workflow_dispatch:
     inputs:
@@ -46,7 +46,7 @@ jobs:
           mv $(ls -1 ./bin/targets/*/*/*img.gz | head -1) $GITHUB_WORKSPACE/release/$DEVICE.img.gz
           cd $GITHUB_WORKSPACE/release/ && md5sum $DEVICE.img.gz > $DEVICE.img.gz.md5
           gzip -dc $DEVICE.img.gz | md5sum | sed "s/-/$DEVICE.img/" > $DEVICE.img.md5
-          echo "strDate=$(TZ=UTC-8 date +%Y-%m-%d)" >> $GITHUB_ENV
+          echo "strDate=$(TZ=UTC-8 date +%Y.%m.%d-%H%M)" >> $GITHUB_ENV
           echo "strDevice=$(echo $DEVICE | awk '{print toupper($0)}')" >> $GITHUB_ENV
 
           cd $GITHUB_WORKSPACE/ib
