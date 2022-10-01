@@ -62,13 +62,13 @@ jobs:
       - name: Delete workflow runs
         uses: GitRML/delete-workflow-runs@main
         with:
-          retain_days: 15
-          keep_minimum_runs: 11
+          retain_days: 10
+          keep_minimum_runs: 5
       - name: Remove old Releases
         uses: dev-drprasad/delete-older-releases@v0.2.0
         with:
           repo: stroll101/actions2022 # defaults to current repo
-          keep_latest: 30
+          keep_latest: 20
           delete_tag_pattern: x86 # defaults to ""
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
